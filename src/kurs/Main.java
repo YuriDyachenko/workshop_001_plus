@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
 
 public class Main {
 
@@ -47,17 +48,18 @@ public class Main {
             return -1;
         }
 
-        String dateString;
+        Long unixTime;
         try {
-            dateString = extractFromJSON(text, "datetime");
-            if (dateString == null || dateString.isEmpty()) return -1;
+            unixTime = extractUnixTimeFromJSON(text, "unixtime");
+            if (unixTime == null || unixTime == 0) return -1;
         } catch (ParseException e) {
             e.printStackTrace();
             return -1;
         }
 
-        String hourString = dateString.substring(11, 13);
-        return Integer.parseInt(hourString);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(unixTime * 1000);
+        return calendar.get(Calendar.HOUR_OF_DAY);
     }
 
     private static String getDateStringFromInternet() throws IOException {
@@ -80,9 +82,9 @@ public class Main {
         }
     }
 
-    public static String extractFromJSON(String textJSON, String name) throws ParseException {
+    public static Long extractUnixTimeFromJSON(String textJSON, String name) throws ParseException {
         JSONObject jsonObject = (JSONObject) new JSONParser().parse(textJSON);
-        return (String) jsonObject.get(name);
+        return (Long) jsonObject.get(name);
     }
 
 }
